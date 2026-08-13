@@ -1,0 +1,5 @@
+#!/bin/bash
+# fnOS install callback (Docker app).
+# Runs after installation completes. No post-install steps needed; the
+# container is managed by fnOS through the Docker Compose project.
+exit 0

@@ -1,0 +1,5 @@
+#!/bin/bash
+# fnOS install hook (Docker app).
+# Runs before installation. This app is fully containerized via Docker Compose,
+# so no host-side setup is required here.
+exit 0

@@ -50,7 +50,9 @@ jobs:
           chmod +x fnpack
 
       - name: Build FPK
-        run: ./fnpack build --directory .
+        run: |
+          chmod +x cmd/main cmd/install_init cmd/install_callback
+          ./fnpack build --directory .
 
       - name: Upload FPK artifact
         uses: actions/upload-artifact@v4
