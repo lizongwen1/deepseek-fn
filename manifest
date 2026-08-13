@@ -1,0 +1,14 @@
+appname=deepseek-harness
+version=0.1.0
+display_name=DeepSeek Harness
+desc=DeepSeek 开源 Agent 运行时（一切皆插件）。本地部署在飞牛 fnOS 上，浏览器即可使用，支持 DeepSeek / OpenAI 兼容模型。
+source=thirdparty
+platform=x86
+maintainer=Your Name
+distributor=Your Name
+desktop_uidir=ui
+desktop_applaunchname=deepseek-harness.main
+service_port=3080
+checkport=true
+ctl_stop=true
+os_min_version=0.9.0

@@ -1,0 +1,17 @@
+[
+  {
+    "stepTitle": "模型 API 配置",
+    "items": [
+      {
+        "type": "tips",
+        "helpText": "此处填写的 API Key 会以环境变量注入容器。若留空或后续需要切换模型，也可在打开应用后于 Settings → Models 中手动填写（支持 DeepSeek 及任意 OpenAI 兼容端点）。"
+      },
+      {
+        "type": "text",
+        "field": "wizard_api_key",
+        "label": "DeepSeek / OpenAI 兼容 API Key",
+        "rules": [{ "required": false, "min": 10 }]
+      }
+    ]
+  }
+]

@@ -1,0 +1,21 @@
+services:
+  deepseek-harness:
+    image: __GHCR_IMAGE__
+    container_name: deepseek-harness
+    restart: unless-stopped
+    ports:
+      - "${TRIM_SERVICE_PORT}:3080"
+    environment:
+      - HOME=/root
+      - DEEPSEEK_API_KEY=${wizard_api_key}
+    volumes:
+      # 会话、配置、Trajectory 日志等持久化数据
+      - "${TRIM_PKGVAR}/data:/root/.local/share/dsh"
+      # 默认工作目录（Agent 可读写的文件沙箱），可在 Web UI 里再切换
+      - "${TRIM_PKGVAR}/workspace:/workspace"
+    networks:
+      - trim-default
+
+networks:
+  trim-default:
+    external: true
