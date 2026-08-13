@@ -1,0 +1,4 @@
+#!/bin/bash
+# fnOS config callback (Docker app). Runs after a config change.
+# No restart of host processes needed; the container reads config at launch.
+exit 0

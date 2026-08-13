@@ -1,0 +1,4 @@
+#!/bin/bash
+# fnOS upgrade callback (Docker app). Runs after an upgrade.
+# Image/compose changes are applied by fnOS via the Docker Compose project.
+exit 0

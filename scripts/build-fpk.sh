@@ -18,7 +18,10 @@ sed -i "s#__GHCR_IMAGE__#$GHCR_IMAGE#g" app/docker/docker-compose.yaml
 # 3) 下载 fnpack (1.2.1 支持 platform=all，且要求 cmd/install_init) 并出包
 curl -#kL https://static2.fnnas.com/fnpack/fnpack-1.2.1-linux-amd64 -o fnpack
 chmod +x fnpack
-chmod +x cmd/main cmd/install_init cmd/install_callback
+chmod +x cmd/main cmd/install_init cmd/install_callback \
+  cmd/uninstall_init cmd/uninstall_callback \
+  cmd/upgrade_init cmd/upgrade_callback \
+  cmd/config_init cmd/config_callback
 ./fnpack build --directory .
 
 echo "产出: deepseek-harness.fpk"

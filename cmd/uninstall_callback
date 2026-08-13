@@ -1,0 +1,4 @@
+#!/bin/bash
+# fnOS uninstall callback (Docker app). Runs after uninstall.
+# User data lives in the Docker volume and is left in place by default.
+exit 0

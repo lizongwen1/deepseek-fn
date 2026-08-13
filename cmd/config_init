@@ -1,0 +1,4 @@
+#!/bin/bash
+# fnOS config hook (Docker app). Runs before a config change.
+# Configuration is supplied through environment variables / the web UI.
+exit 0

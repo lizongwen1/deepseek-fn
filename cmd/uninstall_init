@@ -1,0 +1,4 @@
+#!/bin/bash
+# fnOS uninstall hook (Docker app). Runs before uninstall.
+# No host-side teardown needed; fnOS stops/removes the Docker Compose project.
+exit 0

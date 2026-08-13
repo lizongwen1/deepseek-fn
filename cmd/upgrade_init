@@ -1,0 +1,4 @@
+#!/bin/bash
+# fnOS upgrade hook (Docker app). Runs before an upgrade.
+# No host-side preparation needed.
+exit 0
