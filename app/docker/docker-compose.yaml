@@ -5,7 +5,8 @@ services:
     restart: unless-stopped
     pull_policy: always
     ports:
-      - "${TRIM_SERVICE_PORT}:3080"
+      # 容器内由 socat 监听 3081 并转发给 dsh(127.0.0.1:3080)，与 dsh 错开端口避免冲突
+      - "${TRIM_SERVICE_PORT}:3081"
     environment:
       - HOME=/root
       - DEEPSEEK_API_KEY=${wizard_api_key}
