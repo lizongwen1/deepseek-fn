@@ -3,6 +3,7 @@ services:
     image: __GHCR_IMAGE__
     container_name: deepseek-harness
     restart: unless-stopped
+    pull_policy: always
     ports:
       - "${TRIM_SERVICE_PORT}:3080"
     environment:
