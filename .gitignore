@@ -13,3 +13,5 @@ ehthumbs.db
 
 # 依赖（镜像内已处理，仓库不含）
 node_modules/
+.venv/
+render_icon.py
