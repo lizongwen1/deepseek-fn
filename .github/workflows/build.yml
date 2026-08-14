@@ -39,9 +39,9 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/deepseek-harness-fnos:latest
             ghcr.io/${{ github.repository_owner }}/deepseek-harness-fnos:${{ github.ref_name }}
 
-      - name: Replace image placeholder in compose
+      - name: Replace image placeholder in compose (pin to exact version tag, not :latest)
         run: |
-          sed -i "s#__GHCR_IMAGE__#ghcr.io/${{ github.repository_owner }}/deepseek-harness-fnos:latest#g" \
+          sed -i "s#__GHCR_IMAGE__#ghcr.io/${{ github.repository_owner }}/deepseek-harness-fnos:${{ github.ref_name }}#g" \
             app/docker/docker-compose.yaml
 
       - name: Download fnpack

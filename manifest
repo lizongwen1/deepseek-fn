@@ -1,5 +1,5 @@
 appname=deepseek-harness
-version=0.1.5
+version=0.1.6
 display_name=DeepSeek Harness
 desc=DeepSeek 开源 Agent 运行时（一切皆插件）。本地部署在飞牛 fnOS 上，浏览器即可使用，支持 DeepSeek / OpenAI 兼容模型。
 source=thirdparty
