@@ -7,7 +7,10 @@
 //  2) dsh web 前端用到 crypto.randomUUID / AbortSignal.timeout / AbortSignal.any，
 //     而飞牛内置 webview（及部分旧浏览器 / 非安全上下文的 http://LAN）没有这些 API -> 报错。
 //     这里在 HTML 的 </head> 前注入 polyfill，提前挂上全局实现。
-//  3) 同时支持 WebSocket 升级（agent 流式输出用），原样 TCP 隧道转发。
+//  3) dsh web 的 /api 有 browser-trust 围栏（防 DNS 重绑定），host.* 特权 RPC 默认只信任
+//     127.0.0.1:<port>。浏览器/fnOS 经 LAN IP 访问时 Host 头带 LAN IP -> 被拒 403。
+//     代理把转发的 Host/Origin 改写成 127.0.0.1:<port>（代理本就在本机连它，合法 loopback）。
+//  4) 同时支持 WebSocket 升级（agent 流式输出用），原样 TCP 隧道转发。
 
 const http = require('http');
 const net = require('net');
@@ -78,6 +81,14 @@ function sendProxy(req, res, attempt) {
   const headers = Object.assign({}, req.headers);
   headers['accept-encoding'] = 'identity';
 
+  // 关键修复：把 Host/Origin 改写成 loopback，让 dsh 的 browser-trust 围栏放行。
+  // dsh web 的 /api 围栏默认只信任 127.0.0.1(<port>)，浏览器/fnOS 经 LAN IP 访问时
+  // Host 头带的是 LAN IP，不在受信列表 -> host.listDirectory 等特权 RPC 返回 403。
+  // 代理本身就在本机连 127.0.0.1:TARGET_PORT，改写 Host 为 loopback 是合法且必要的。
+  headers['host'] = TARGET_HOST + ':' + TARGET_PORT;
+  if (headers['origin']) headers['origin'] = 'http://' + TARGET_HOST + ':' + TARGET_PORT;
+  if (headers['referer']) headers['referer'] = 'http://' + TARGET_HOST + ':' + TARGET_PORT + '/';
+
   const options = {
     method: req.method,
     headers: headers,
@@ -95,6 +106,15 @@ function sendProxy(req, res, attempt) {
     // 注入 CORS 头，允许浏览器跨域调用 dsh API（修复 /api/* 403）
     outHeaders['access-control-allow-origin'] = req.headers['origin'] || '*';
     outHeaders['access-control-allow-credentials'] = 'true';
+
+    // 防御：若 dsh 返回指向 127.0.0.1 的重定向，改写为客户端实际访问的 host
+    if (outHeaders['location'] && /127\.0\.0\.1/.test(outHeaders['location'])) {
+      try {
+        const u = new URL(outHeaders['location']);
+        const clientHost = req.headers['host'] || (TARGET_HOST + ':' + LISTEN_PORT);
+        outHeaders['location'] = u.protocol + '//' + clientHost + u.pathname + u.search + u.hash;
+      } catch (e) { /* 忽略解析失败 */ }
+    }
 
     const ct = pres.headers['content-type'] || '';
     if (ct.indexOf('text/html') !== -1) {
