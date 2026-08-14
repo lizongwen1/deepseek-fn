@@ -5,7 +5,8 @@ services:
     restart: unless-stopped
     pull_policy: always
     ports:
-      # 容器内由 socat 监听 3081 并转发给 dsh(127.0.0.1:3080)，与 dsh 错开端口避免冲突
+      # 容器内由 proxy.js 监听 3081 并转发给 dsh(127.0.0.1:3080)，与 dsh 错开端口避免冲突
+      # proxy.js 同时删除 X-Frame-Options 并注入 crypto.randomUUID / AbortSignal.timeout 的 polyfill
       - "${TRIM_SERVICE_PORT}:3081"
     environment:
       - HOME=/root

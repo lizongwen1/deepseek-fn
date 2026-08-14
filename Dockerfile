@@ -6,10 +6,11 @@ FROM node:22-bookworm-slim
 ARG DSH_VERSION=0.1.0-rc.6
 ENV DSH_VERSION=${DSH_VERSION}
 
-# socat: 把 dsh web 的 127.0.0.1:3080 反代到 0.0.0.0:3080
+# ca-certificates: 拉 GHCR/网络所需
 # python3/make/g++/pkg-config: dsh 依赖 node-pty 原生模块，slim 镜像缺编译工具，必须补上才能 npm install
+# 反代改用镜像自带的 Node 代理 proxy.js，不再需要 socat
 RUN apt-get update \
- && apt-get install -y --no-install-recommends socat ca-certificates python3 make g++ pkg-config \
+ && apt-get install -y --no-install-recommends ca-certificates python3 make g++ pkg-config \
  && rm -rf /var/lib/apt/lists/*
 
 # 把 dsh CLI（含 Web UI）烤进镜像，避免运行时下载
@@ -19,6 +20,7 @@ RUN npm install -g @deepseek-ai/dsh@${DSH_VERSION}
 WORKDIR /workspace
 
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY proxy.js /usr/local/bin/proxy.js
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 3080
