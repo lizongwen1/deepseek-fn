@@ -4,8 +4,8 @@
 // 解决的问题：
 //  1) dsh web 响应头带 X-Frame-Options / CSP frame-ancestors，飞牛 iframe 被浏览器静默拦截 -> 白屏
 //     这里直接删除这些响应头，允许 iframe 嵌入。
-//  2) dsh web 前端用到 crypto.randomUUID / AbortSignal.timeout，
-//     而飞牛内置 webview（及部分旧浏览器 / 非安全上下文的 http://LAN）没有这两个 API -> 报错。
+//  2) dsh web 前端用到 crypto.randomUUID / AbortSignal.timeout / AbortSignal.any，
+//     而飞牛内置 webview（及部分旧浏览器 / 非安全上下文的 http://LAN）没有这些 API -> 报错。
 //     这里在 HTML 的 </head> 前注入 polyfill，提前挂上全局实现。
 //  3) 同时支持 WebSocket 升级（agent 流式输出用），原样 TCP 隧道转发。
 
@@ -52,6 +52,24 @@ const POLYFILL = `<script>(function(){
         return ctrl.signal;
       };
     }
+    if (typeof globalThis.AbortSignal.any !== 'function') {
+      globalThis.AbortSignal.any = function(signals){
+        var controller = new AbortController();
+        var aborted = false;
+        var abortOne = function(reason) {
+          if (aborted) return;
+          aborted = true;
+          controller.abort(reason);
+        };
+        for (var i = 0; i < signals.length; i++) {
+          (function(s){
+            if (s.aborted) { abortOne(s.reason); return; }
+            s.addEventListener('abort', function(){ abortOne(s.reason); }, { once: true });
+          })(signals[i]);
+        }
+        return controller.signal;
+      };
+    }
   } catch (e) { /* 忽略 polyfill 异常，交由页面自身处理 */ }
 })();</script>`;
 
@@ -73,6 +91,10 @@ function sendProxy(req, res, attempt) {
     const outHeaders = Object.assign({}, pres.headers);
     delete outHeaders['x-frame-options'];
     delete outHeaders['content-security-policy'];
+
+    // 注入 CORS 头，允许浏览器跨域调用 dsh API（修复 /api/* 403）
+    outHeaders['access-control-allow-origin'] = req.headers['origin'] || '*';
+    outHeaders['access-control-allow-credentials'] = 'true';
 
     const ct = pres.headers['content-type'] || '';
     if (ct.indexOf('text/html') !== -1) {
@@ -118,6 +140,17 @@ function sendProxy(req, res, attempt) {
 }
 
 const server = http.createServer(function (req, res) {
+  // CORS：处理 OPTIONS 预检请求
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': req.headers['origin'] || '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      'Access-Control-Allow-Headers': '*',
+      'Access-Control-Max-Age': '86400',
+    });
+    res.end();
+    return;
+  }
   sendProxy(req, res, 0);
 });
 
